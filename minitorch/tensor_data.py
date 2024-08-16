@@ -42,9 +42,7 @@ def index_to_position(index: Index, strides: Strides) -> int:
     Returns:
         Position in storage
     """
-
-    # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    return sum(i * s for i, s in zip(index, strides))
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
@@ -59,9 +57,9 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
         shape : tensor shape.
         out_index : return index corresponding to position.
 
+    Returns:
+        None: Modifies `out_index` in place.
     """
-    # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
 
 
 def broadcast_index(
