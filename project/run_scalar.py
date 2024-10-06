@@ -2,6 +2,7 @@
 Be sure you have minitorch installed in you Virtual Env.
 >>> pip install -Ue .
 """
+
 import random
 
 import minitorch
@@ -10,7 +11,10 @@ import minitorch
 class Network(minitorch.Module):
     def __init__(self, hidden_layers):
         super().__init__()
-        raise NotImplementedError("Need to include this file from past assignment.")
+
+        self.layer1 = Linear(2, 2)
+        self.layer2 = Linear(2, 2)
+        self.layer3 = Linear(2, 1)
 
     def forward(self, x):
         middle = [h.relu() for h in self.layer1.forward(x)]
@@ -39,7 +43,29 @@ class Linear(minitorch.Module):
             )
 
     def forward(self, inputs):
-        raise NotImplementedError("Need to include this file from past assignment.")
+        """
+        Compute the forward pass of the linear layer. y = Wx + b
+
+        Args:
+            inputs: List of input scalars
+
+        Returns:
+            List of output scalars
+        """
+
+        def dot_product_generator(val, weights):
+            for weight in weights:
+                yield val * weight.value
+
+        inner_products = []
+        for i, val in enumerate(inputs):
+            inner_products.append(sum(dot_product_generator(val, self.weights[i])))
+
+        forward = []
+        for bias in self.bias:
+            forward.append(sum(inner_products) + bias.value)
+
+        return forward
 
 
 def default_log_fn(epoch, total_loss, correct, losses):

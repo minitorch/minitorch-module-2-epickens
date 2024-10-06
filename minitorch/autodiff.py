@@ -22,7 +22,15 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
     Returns:
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+
+    # Step 1: Compute f(x_0, ..., x_{i-1}, x_i + epsilon / 2, x_{i+1}, ..., x_{n-1})
+    forward_diff = f(*vals[:arg], vals[arg] + epsilon, *vals[arg + 1 :])
+
+    # Step 2: Compute f(x_0, ..., x_{i-1}, x_i - epsilon / 2, x_{i+1}, ..., x_{n-1})
+    backward_diff = f(*vals[:arg], vals[arg] - epsilon, *vals[arg + 1 :])
+
+    # Step 3: Compute the central difference
+    return (forward_diff - backward_diff) / (2 * epsilon)
 
 
 variable_count = 1
@@ -60,13 +68,31 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
     Returns:
         Non-constant Variables in topological order starting from the right.
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    result = []
+    visited = set()
+
+    def visit(v: Variable) -> None:
+        if v.unique_id in visited:
+            return
+        visited.add(v.unique_id)
+        for parent in v.parents:
+            visit(parent)
+        result.append(v)
+
+    visit(variable)
+
+    if len(result) != len(visited):
+        raise ValueError("Cycle detected in the computation graph.")
+
+    result.reverse()
+
+    return result
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
     """
     Runs backpropagation on the computation graph in order to
-    compute derivatives for the leave nodes.
+    compute derivatives for the leaf nodes.
 
     Args:
         variable: The right-most variable
@@ -74,7 +100,26 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
 
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+
+    # Step 1: Get the topological order of the computation graph
+    variables = topological_sort(variable)
+
+    # Step 2: Create a dictionary to store the derivative of each variable
+    derivative_map = {variable.unique_id: deriv}
+
+    # Step 3: Propagate the derivative backward
+    for v in variables:
+        if v.parents:
+            for parent, derivative in v.chain_rule(derivative_map[v.unique_id]):
+                if parent.unique_id in derivative_map:
+                    derivative_map[parent.unique_id] += derivative
+                else:
+                    derivative_map[parent.unique_id] = derivative
+
+    # Step 4: Accumulate the derivative to the leaf nodes
+    for v in variables:
+        if v.is_leaf():
+            v.accumulate_derivative(derivative_map[v.unique_id])
 
 
 @dataclass
