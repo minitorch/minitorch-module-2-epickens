@@ -60,6 +60,10 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
     Returns:
         None: Modifies `out_index` in place.
     """
+    stride = strides_from_shape(shape)
+    for i in range(len(shape)):
+        out_index[i] = ordinal // stride[i]
+        ordinal = ordinal % stride[i]
 
 
 def broadcast_index(
@@ -104,6 +108,15 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
 
 
 def strides_from_shape(shape: UserShape) -> UserStrides:
+    """
+    Create strides from shape.
+
+    Args:
+        shape : shape of tensor
+
+    Returns:
+        strides
+    """
     layout = [1]
     offset = 1
     for s in reversed(shape):
